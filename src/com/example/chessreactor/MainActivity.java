@@ -47,7 +47,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 		try {
 			writer = new BufferedWriter(new FileWriter(file));
 
-			// on sauvegarde les informations d'odre general sur la premiere ligne
+			// on sauvegarde les informations d'ordre general sur la premiere ligne
 			writer.write(jeu.numCoup+"-"+eol);
 			
 			// pour chaque piece on ecrit son historique
@@ -87,45 +87,61 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 
 		file = new File(path);
 
-		try {
-			input = new BufferedReader(new FileReader(file));
-			String line;
-			int i, len;
-			String str[];		
-			List<Piece> list = Echiquier.getPieces();
-			
-			for(Piece p : list){
+		if(file.exists())
+		{
+			try {
+				input = new BufferedReader(new FileReader(file));
+				String line;	
+				List<Piece> list = Echiquier.getPieces();
+				
+				// charge le numero de coup
 				if((line = input.readLine()) != null){
-					i = 1;
-					str = line.split("-");
-					len = str.length;
-
-					if(len > 1){
-						while( i < len){
-							p.history.add(new int[] {(str[i].charAt(0)-'0'),(str[i].charAt(2)-'0'),(str[i].charAt(4)-'0')});
-							i++;
-						}
-						
-						// remettre la piece a sa place d'avant la destruction du contexte
-						p.setPosX(p.history.get(p.history.size()-1)[1]);
-						p.setPosY(p.history.get(p.history.size()-1)[2]);
-						
-						jeu.majPos(p);
-					}
-
-				}else{
-					// todo gerer les erreurs
+					String str[] = line.split("-");
+					jeu.numCoup = Integer.parseInt(str[0]);
 				}
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+				
+				for(Piece p : list){					
+					if((line = input.readLine()) != null){
+						String str[] = line.split("-");
+						int len = str.length;
+						// on commence a 1 car la position d'origine est chargee lors de l'instanciation de la piece
+						int i = 1;
+	
+						// si la piece a bouge
+						if(len > 1){
+							while( i < len){
+								String tmp[]=str[i].split(",");
+								p.history.add(new int[] {Integer.parseInt(tmp[0]),Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2])});
+								i++;
+							}
+							
+							// remettre la piece a sa place d'avant la destruction du contexte
+							p.setPosX(p.history.get(p.history.size()-1)[1]);
+							p.setPosY(p.history.get(p.history.size()-1)[2]);
+							
+							if(p.posY == 0 || p.posX == 0){
+								// la piece a ete capture : elle n'est plus sur le plateau
+								jeu.capturePiece(p,true);
+							}else{
+								jeu.majPos(p,false);
+							}
+							
+						}
+	
+					}else{
+						// todo gerer les erreurs
+					}
+				}
+	
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if (input != null) {
+					try {
+						input.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -198,6 +214,9 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 	@Override
 	protected void onRestart() {
 		// TODO Auto-generated method stub
+		
+		jeu.restart = true;
+		
 		super.onRestart();
 		
 		Log.i("onRestart","onRestart called");
@@ -264,8 +283,8 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 					if(vDep < 0)
 					{
 						// deplacement annule
-						pf.posX = pf.posX0;
-						pf.posY = pf.posY0;
+						pf.posY = pf.posX0;
+						pf.posX = pf.posY0;
 					}
 					else
 					{
@@ -275,7 +294,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 					
 					pf.enDeplacement = false;
 					
-					Log.i("ACTION_UP","X = "+pf.posX+" Y = "+pf.posY);
+					Log.i("ACTION_UP","X = "+pf.posY+" Y = "+pf.posX);
 				}
 					
 				Log.i("ACTION_UP","verifDeplacement retourne : "+vDep);

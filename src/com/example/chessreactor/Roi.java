@@ -11,7 +11,7 @@ public class Roi extends Piece{
 	protected boolean mouvAutorise()
 	{
 		// le roi ne se deplace que d'une case sauf dans le cas du roque
-		if(Math.abs(this.posX-this.posX0)>2||(Math.abs(this.posY-this.posY0)>1))
+		if(Math.abs(this.posY-this.posX0)>2||(Math.abs(this.posX-this.posY0)>1))
 			return false;
 			
 		return true;

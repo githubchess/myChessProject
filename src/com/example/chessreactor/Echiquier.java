@@ -30,7 +30,9 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 	private static List<Piece> pieces = null;
 	
 	boolean flag = false;
-	int numCoup = 0;
+	boolean restart = false;
+	couleurPiece tourJoueur = couleurPiece.BLANCHE;
+	int numCoup = 1;	
 	
 	private static int wScreen = 0;
 	private static int hScreen = 0;
@@ -112,7 +114,7 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		}
 		
 		for(Piece p : pieces){			
-			plateau[p.posY-1][p.posX-1].setOccupant(p);
+			plateau[p.posX-1][p.posY-1].setOccupant(p);
 		}
 		
 
@@ -171,31 +173,22 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		pCanvas.drawColor(Color.rgb(0, 0, 50));
 		
 		if(plateau != null){
-			//for(Case c : plateau){
 			for(int i=1;i<=8;i++){
 				for(int j=1;j<=8;j++){
-				
 					// construction du rectangle selon le numero de case
-					
 					switch(plateau[i-1][j-1].getcCase()){
 					case BLANCHE :
 						mPaint.setColor(Color.WHITE);
-						//pCanvas.drawBitmap(CaseBlanche,null, r, null); 
 						break;
 					case NOIRE :
 						mPaint.setColor(Color.rgb(100,100,100));
-						//pCanvas.drawBitmap(CaseNoire,null, r, null);
 						break;
 					default :
 						break;
 					}
-	
 					pCanvas.drawRect(new Rect((i-1)*wRect,(8-j)*wRect,wRect*i,(9-j)*wRect), mPaint);
-
 				}
-
 			}
-
 			
 			for(Piece p : pieces){
 				
@@ -204,51 +197,53 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 				
 				Rect r;
 				
-				if(!p.enDeplacement)
-					r = new Rect((col-1)*wRect,(8-ligne)*wRect,wRect*col,(9-ligne)*wRect);
-				else
-					r = new Rect(col-wRect/2,ligne-wRect/2,col+wRect/2,wRect/2+ligne);
-			
-				switch(p.tPiece){
-				case PION :
-					if(p.getcPiece() == couleurPiece.BLANCHE)
-						pCanvas.drawBitmap(imgPionBlanc,null, r, null);
-					else if (p.getcPiece() == couleurPiece.NOIRE)
-						pCanvas.drawBitmap(imgPionNoir,null, r, null);
-					break;
-				case TOUR :
-					if(p.getcPiece() == couleurPiece.BLANCHE)
-						pCanvas.drawBitmap(imgTourBlanc,null, r, null);
-					else if (p.getcPiece() == couleurPiece.NOIRE)
-						pCanvas.drawBitmap(imgTourNoir,null, r, null);
-					break;
-				case FOU :
-					if(p.getcPiece() == couleurPiece.BLANCHE)
-						pCanvas.drawBitmap(imgFouBlanc,null, r, null);
-					else if (p.getcPiece() == couleurPiece.NOIRE)
-						pCanvas.drawBitmap(imgFouNoir,null, r, null);
-					break;
-				case CAVALIER :
-					if(p.getcPiece() == couleurPiece.BLANCHE)
-						pCanvas.drawBitmap(imgCavalierBlanc,null, r, null);
-					else if (p.getcPiece() == couleurPiece.NOIRE)
-						pCanvas.drawBitmap(imgCavalierNoir,null, r, null);
-					break;
-				case REINE :
-					if(p.getcPiece() == couleurPiece.BLANCHE)
-						pCanvas.drawBitmap(imgReineBlanc,null, r, null);
-					else if (p.getcPiece() == couleurPiece.NOIRE)
-						pCanvas.drawBitmap(imgReineNoir,null, r, null);
-					break;
-				case ROI :
-					if(p.getcPiece() == couleurPiece.BLANCHE)
-						pCanvas.drawBitmap(imgRoiBlanc,null, r, null);
-					else if (p.getcPiece() == couleurPiece.NOIRE)
-						pCanvas.drawBitmap(imgRoiNoir,null, r, null);
-					break;
-					
-				default :
-					break;
+				if(!p.capturee){
+					if(!p.enDeplacement)
+						r = new Rect((col-1)*wRect,(8-ligne)*wRect,wRect*col,(9-ligne)*wRect);
+					else
+						r = new Rect(col-wRect/2,ligne-wRect/2,col+wRect/2,wRect/2+ligne);
+				
+					switch(p.tPiece){
+					case PION :
+						if(p.getcPiece() == couleurPiece.BLANCHE)
+							pCanvas.drawBitmap(imgPionBlanc,null, r, null);
+						else if (p.getcPiece() == couleurPiece.NOIRE)
+							pCanvas.drawBitmap(imgPionNoir,null, r, null);
+						break;
+					case TOUR :
+						if(p.getcPiece() == couleurPiece.BLANCHE)
+							pCanvas.drawBitmap(imgTourBlanc,null, r, null);
+						else if (p.getcPiece() == couleurPiece.NOIRE)
+							pCanvas.drawBitmap(imgTourNoir,null, r, null);
+						break;
+					case FOU :
+						if(p.getcPiece() == couleurPiece.BLANCHE)
+							pCanvas.drawBitmap(imgFouBlanc,null, r, null);
+						else if (p.getcPiece() == couleurPiece.NOIRE)
+							pCanvas.drawBitmap(imgFouNoir,null, r, null);
+						break;
+					case CAVALIER :
+						if(p.getcPiece() == couleurPiece.BLANCHE)
+							pCanvas.drawBitmap(imgCavalierBlanc,null, r, null);
+						else if (p.getcPiece() == couleurPiece.NOIRE)
+							pCanvas.drawBitmap(imgCavalierNoir,null, r, null);
+						break;
+					case REINE :
+						if(p.getcPiece() == couleurPiece.BLANCHE)
+							pCanvas.drawBitmap(imgReineBlanc,null, r, null);
+						else if (p.getcPiece() == couleurPiece.NOIRE)
+							pCanvas.drawBitmap(imgReineNoir,null, r, null);
+						break;
+					case ROI :
+						if(p.getcPiece() == couleurPiece.BLANCHE)
+							pCanvas.drawBitmap(imgRoiBlanc,null, r, null);
+						else if (p.getcPiece() == couleurPiece.NOIRE)
+							pCanvas.drawBitmap(imgRoiNoir,null, r, null);
+						break;
+						
+					default :
+						break;
+					}
 				}
 			}
 		}
@@ -271,19 +266,14 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		else
 		{
 			scale_img();
-			Initialise();
+			if(!this.restart)
+				Initialise();
 			
 			mThread = new DrawingThread();
-			mThread.start();
-			
-			
+			mThread.start();	
 		}
-		
 		flag = true;
-
-		
 	    Log.i("surfaceCreated","surfaceCreated"); 
-	    
 	}
 
 
@@ -297,18 +287,8 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 				retry = false;
 			} catch (InterruptedException e) {}
 		}
-		
-
-		//CaseBlanche.recycle();
-		//CaseNoire.recycle();
-		
 		recycle_img();
-		
-		//mThread.interrupt();
-		
-
 		Log.i("surfaceDestroyed","surfaceDestroyed"); 
-		
 	}
 
 
@@ -376,7 +356,37 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		return null;
 	}
 	
-	public void majPos(Piece pf)
+	public void capturePiece(Piece pf, boolean refresh)
+	{
+		if(pf == null)
+		{
+			Log.i("capturePiece","piece == null");
+			return;
+		}
+		
+		// si c'est un rafraichissement de la position suite a une destruction de l'activite
+		if(refresh)
+		{		
+			// la piece est a sa position d'origine pour l'instant
+			plateau[pf.history.get(0)[1]-1][pf.history.get(0)[2]-1].setOccupant(null);
+		}
+		else
+		{
+			// libere la case de destination
+			plateau[pf.posX-1][pf.posY-1].setOccupant(null);
+			pf.history.add(new int[]{this.numCoup,0,0});
+		}
+		
+		// la piece capturee se retrouve hors du plateau
+		pf.posY = 0;
+		pf.posX0 = 0;
+		pf.posX = 0;
+		pf.posY0 = 0;
+		
+		pf.capturee = true;	
+	}
+	
+	public void majPos(Piece pf, boolean updateHistory)
 	{		
 		if(pf == null)
 		{
@@ -385,61 +395,66 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		}
 		
 		// remplit la case de destination
-		plateau[pf.posY-1][pf.posX-1].setOccupant(pf);
+		plateau[pf.posX-1][pf.posY-1].setOccupant(pf);
 		// libere la case d'origine
 		plateau[pf.posY0-1][pf.posX0-1].setOccupant(null); 
 		
 		// repositionne la position d'origine sur la destination
-		pf.posX0 = pf.posX;
-		pf.posY0 = pf.posY;
+		pf.posX0 = pf.posY;
+		pf.posY0 = pf.posX;
 		
-		// alimente l'historique de la piece
-		pf.history.add(new int[]{this.numCoup,pf.posY,pf.posX});
+		// alimente l'historique de la piece sauf si chargement de configuration du plateau (deja fait prealablement)
+		if(updateHistory)
+			pf.history.add(new int[]{this.numCoup,pf.posX,pf.posY});
+		
+		this.tourJoueur = (pf.cPiece == couleurPiece.BLANCHE)?couleurPiece.NOIRE:couleurPiece.BLANCHE;
 	}
 	
 	// retourne un nombre positif si la piece a ete deplacee (0 sur une case vide, 1 prend une piece adverse, 2 roc, 3 transformation, 4 position d'origine)
-	// sinon un nombre negatif (-1 ne doit pas arriver, -2 hors plateau, -3 place occupee, -4 deplacement non autorise pour la piece, -5 decouvre roi)
+	// sinon un nombre negatif (-1 ne doit pas arriver, -2 hors plateau, -3 place occupee, -4 deplacement non autorise pour la piece, -5 decouvre roi, -6 tour du joueur adverse)
 	public int verifDeplacement(Piece p)
 	{
 		Piece prise = null;
 		
 		// normalise la position de la piece
-		p.posY = 8-p.posY/wRect;
-		p.posX = p.posX/wRect+1;
+		p.posX = 8-p.posX/wRect;
+		p.posY = p.posY/wRect+1;
 		
-		if((p.posX == p.posX0)&&(p.posY == p.posY0))
+		if((p.posY == p.posX0)&&(p.posX == p.posY0))
 			return 4;
 		
 		// si la piece n'etait pas en deplacement (erreur a priori)
 		if(!p.enDeplacement)
 			return -1;
 		
+		// si c'est au joueur adverse de jouer
+		if(p.cPiece != this.tourJoueur)
+			return -6;
+		
 		// piece reposee hors plateau
-		if( (p.posY > 8) || (p.posX > 8) ||(p.posY <= 0) ||(p.posX <= 0))
+		if( (p.posX > 8) || (p.posY > 8) ||(p.posX <= 0) ||(p.posY <= 0))
 			return -2;		
 		
 		if(!p.mouvAutorise())
 			return -4;					
 		
 		// place occupee 
-		prise = getPiece(p.posY-1, p.posX-1);
+		prise = getPiece(p.posX-1, p.posY-1);
 		if(prise != null)
 		{
 			//par une piece de la meme couleur
 			if(prise.cPiece == p.cPiece)
 				return -3;
 			else
-			{
-				// place occupee par une piece adverse (le deplacement a ete valide jusque la)
-				prise.posX = 0;
-				prise.posX0 = 0;
-				prise.posY = 0;
-				prise.posY0 = 0;
+			{		
+				capturePiece(prise,false);
+				majPos(p,true);
+				return 1;
 			}
 		}
 
 		// deplacement special roque : si le roi se deplace de 2 case et mouvAutorise est true
-		if(p.tPiece == typePiece.ROI && Math.abs(p.posX-p.posX0)==2)
+		if(p.tPiece == typePiece.ROI && Math.abs(p.posY-p.posX0)==2)
 		{
 			if(this.roque((Roi)p))
 				return 2;
@@ -447,8 +462,7 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 				return -4;
 		}
 		
-		majPos(p);
-		
+		majPos(p,true);
 		return 0;
 	}
 	
@@ -460,7 +474,7 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 			return false;
 		
 		// on determine le cote du roque
-		if(p.posX-p.posX0 > 0)
+		if(p.posY-p.posX0 > 0)
 		{
 			// petit roque
 			if(p.cPiece == couleurPiece.BLANCHE)
@@ -470,10 +484,10 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 					return false;
 				
 				// blancs la tour h1 viens en f1
-				plateau[0][7].occupant.posX = 6;				
+				plateau[0][7].occupant.posY = 6;				
 				plateau[0][5].setOccupant(plateau[0][7].occupant);
 				plateau[0][7].setOccupant(null);
-				majPos(plateau[0][5].occupant);
+				majPos(plateau[0][5].occupant,true);
 			}
 			else
 			{
@@ -481,10 +495,10 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 					return false;
 				
 				// noirs la tour h8 viens en f8
-				plateau[7][7].occupant.posX = 6;
+				plateau[7][7].occupant.posY = 6;
 				plateau[7][5].setOccupant(plateau[7][7].occupant);
 				plateau[7][7].setOccupant(null);
-				majPos(plateau[7][5].occupant);
+				majPos(plateau[7][5].occupant,true);
 			}
 		}
 		else
@@ -496,10 +510,10 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 					return false;
 				
 				// blancs la tour a1 viens en c1
-				plateau[0][0].occupant.posX = 4;
+				plateau[0][0].occupant.posY = 4;
 				plateau[0][2].setOccupant(plateau[0][0].occupant);
 				plateau[0][0].setOccupant(null);
-				majPos(plateau[0][2].occupant);
+				majPos(plateau[0][2].occupant,true);
 			}
 			else
 			{
@@ -507,20 +521,18 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 					return false;
 				
 				// noirs la tour a8 viens en c8
-				plateau[7][0].occupant.posX = 4;
+				plateau[7][0].occupant.posY = 4;
 				plateau[7][2].setOccupant(plateau[7][0].occupant);
 				plateau[7][0].setOccupant(null);
-				majPos(plateau[7][2].occupant);
+				majPos(plateau[7][2].occupant,true);
 			}
 		}		
 		
-		
-		
 		// on deplace le roi
-		plateau[p.posY-1][p.posX-1].setOccupant(p);
+		plateau[p.posX-1][p.posY-1].setOccupant(p);
 		// libere la case d'origine
 		plateau[p.posY0-1][p.posX0-1].setOccupant(null); 
-		majPos(p);
+		majPos(p,true);
 		
 		
 		return true;

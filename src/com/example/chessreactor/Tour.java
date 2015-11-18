@@ -11,7 +11,7 @@ public class Tour extends Piece{
 	@Override
 	protected boolean mouvAutorise()
 	{
-		if(mouvRectiligne(this.posX0, this.posX, this.posY0, this.posY))
+		if(mouvRectiligne(this.posX0, this.posY, this.posY0, this.posX))
 			return true;
 			
 		return false;

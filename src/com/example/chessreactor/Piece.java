@@ -3,6 +3,8 @@ package com.example.chessreactor;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.util.Log;
+
 public class Piece {
 	
 	public enum couleurPiece{
@@ -28,8 +30,8 @@ public class Piece {
 	// ATTENTION les coordonnees sont en pixel lors du deplacement
 	
 	// position actuelle
-	int posY = 0;
 	int posX = 0;
+	int posY = 0;
 	
 	// position d'origine sur un deplacement
 	int posY0 = 0;
@@ -39,21 +41,22 @@ public class Piece {
 	List <int[]>  history;
 	
 	boolean enDeplacement = false;
+	boolean capturee = false;
 	
 	public int getPosX() {
-		return posY;
-	}
-
-	public void setPosX(int posX) {
-		this.posY = posX;
-	}
-
-	public int getPosY() {
 		return posX;
 	}
 
+	public void setPosX(int posX) {
+		this.posX = posX;
+	}
+
+	public int getPosY() {
+		return posY;
+	}
+
 	public void setPosY(int posY) {
-		this.posX = posY;
+		this.posY = posY;
 	}
 
 	public typePiece gettPiece() {
@@ -76,13 +79,13 @@ public class Piece {
 	{
 		this.tPiece = p;
 		this.cPiece = c;
-		this.posY = ligne;
-		this.posX = col;
-		this.posY0 = this.posY;
-		this.posX0 = this.posX;
+		this.posX = ligne;
+		this.posY = col;
+		this.posY0 = this.posX;
+		this.posX0 = this.posY;
 
 		this.history = new ArrayList<int[]>();
-		this.history.add(new int[]{0,this.posY,this.posX});
+		this.history.add(new int[]{0,this.posX,this.posY});
 	}
 
 	// todo override pour chaque piece

@@ -9,32 +9,32 @@ public class Pion extends Piece{
 	@Override
 	protected boolean mouvAutorise()
 	{
-		if(Math.abs(this.posX0-this.posX) > 1)
+		if(Math.abs(this.posX0-this.posY) > 1)
 			return false;
 				
 		// le sens de deplacement depend de la couleur
 		if(this.cPiece == couleurPiece.BLANCHE)
 		{		
 			// les pions avancent droit
-			if(Math.abs(this.posX0-this.posX)==0)
+			if(Math.abs(this.posX0-this.posY)==0)
 			{
 				// avancer d'une case en avant est autorise
-				if(this.posY-this.posY0 == 1)
+				if(this.posX-this.posY0 == 1)
 					return true;
 				// avancer de 2 case est autorise pour le premier deplacement du pion
-				if((this.posY-this.posY0 == 2)&&(this.posY0 == 2))
+				if((this.posX-this.posY0 == 2)&&(this.posY0 == 2))
 					return true;
 			}
 			
 			// les pions peuvent se decaler d'une colonne
-			if(Math.abs(this.posX0-this.posX)==1)
+			if(Math.abs(this.posX0-this.posY)==1)
 			{
 				// s'ils prennent une piece adverse 
-				Piece pr = Echiquier.getPiece(this.posY-1, this.posX-1);
+				Piece pr = Echiquier.getPiece(this.posX-1, this.posY-1);
 				if(pr == null)
 				{
 					// par la "prise en passant"
-					pr = Echiquier.getPiece(this.posY-2, this.posX-1);
+					pr = Echiquier.getPiece(this.posX-2, this.posY-1);
 
 					if(pr == null)
 						return false;
@@ -55,7 +55,7 @@ public class Pion extends Piece{
 				else
 				{
 					// avancer d'une case en avant est autorise
-					if(this.posY-this.posY0 == 1)
+					if(this.posX-this.posY0 == 1)
 						return true;
 
 				}
@@ -64,10 +64,10 @@ public class Pion extends Piece{
 			else
 			{						
 				// avancer d'une case en avant est autorise
-				if(this.posY-this.posY0 == 1)
+				if(this.posX-this.posY0 == 1)
 					return true;
 				// avancer de 2 case est autorise pour le premier deplacement du pion
-				if((this.posY-this.posY0 == 2)&&(this.posY0 == 2))
+				if((this.posX-this.posY0 == 2)&&(this.posY0 == 2))
 					return true;
 			}
 
@@ -75,9 +75,9 @@ public class Pion extends Piece{
 		}
 		if(this.cPiece == couleurPiece.NOIRE) 				// todo prise en passant noirs
 		{
-			if(this.posY0-this.posY == 1)
+			if(this.posY0-this.posX == 1)
 				return true;
-			if((this.posY0-this.posY == 2)&&(this.posY0 == 7))
+			if((this.posY0-this.posX == 2)&&(this.posY0 == 7))
 				return true;
 		}
 		
