@@ -1,6 +1,8 @@
 package com.example.chessreactor;
 
 import com.example.chessboss.R;
+import com.example.chessreactor.Piece.couleurPiece;
+import com.example.chessreactor.Piece.typePiece;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -48,10 +50,11 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 			writer = new BufferedWriter(new FileWriter(file));
 
 			// on sauvegarde les informations d'ordre general sur la premiere ligne
-			writer.write(jeu.numCoup+"-"+eol);
+			writer.write(Echiquier.numCoup+"-"+eol);
 			
 			// pour chaque piece on ecrit son historique
 			for(Piece p : Echiquier.getPieces()){
+				writer.write(p.tPiece.ordinal()+","+p.cPiece.ordinal()+"-");
 				for(int[] iTab : p.history){
 					writer.write(iTab[0]+","+iTab[1]+","+iTab[2]+"-");
 				}
@@ -87,8 +90,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 
 		file = new File(path);
 
-		if(file.exists())
-		{
+		if(file.exists()){
 			try {
 				input = new BufferedReader(new FileReader(file));
 				String line;	
@@ -97,41 +99,115 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 				// charge le numero de coup
 				if((line = input.readLine()) != null){
 					String str[] = line.split("-");
-					jeu.numCoup = Integer.parseInt(str[0]);
+					Echiquier.numCoup = Integer.parseInt(str[0]);
 				}
 				
-				for(Piece p : list){					
-					if((line = input.readLine()) != null){
-						String str[] = line.split("-");
-						int len = str.length;
-						// on commence a 1 car la position d'origine est chargee lors de l'instanciation de la piece
-						int i = 1;
-	
-						// si la piece a bouge
-						if(len > 1){
-							while( i < len){
-								String tmp[]=str[i].split(",");
-								p.history.add(new int[] {Integer.parseInt(tmp[0]),Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2])});
-								i++;
-							}
-							
-							// remettre la piece a sa place d'avant la destruction du contexte
-							p.setPosX(p.history.get(p.history.size()-1)[1]);
-							p.setPosY(p.history.get(p.history.size()-1)[2]);
-							
-							if(p.posY == 0 || p.posX == 0){
-								// la piece a ete capture : elle n'est plus sur le plateau
-								jeu.capturePiece(p,true);
+				//for(Piece p : list){					
+				//	if((line = input.readLine()) != null){
+				//		String str[] = line.split("-");
+				//		int len = str.length;
+				//		// on commence a 1 car la position d'origine est chargee lors de l'instanciation de la piece
+				//		int i = 1;
+	            //
+				//		// si la piece a bouge
+				//		if(len > 1){
+				//			while( i < len){
+				//				String tmp[]=str[i].split(",");
+				//				p.history.add(new int[] {Integer.parseInt(tmp[0]),Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2])});
+				//				i++;
+				//			}
+				//			
+				//			// remettre la piece a sa place d'avant la destruction du contexte
+				//			p.setPosX(p.history.get(p.history.size()-1)[1]);
+				//			p.setPosY(p.history.get(p.history.size()-1)[2]);
+                //
+				//			if(p.posY == 0 || p.posX == 0){
+				//				// la piece a ete capture : elle n'est plus sur le plateau
+				//				Echiquier.capturePiece(p,true);
+				//			}else{
+				//				jeu.majPos(p,false);
+				//			}
+				//			
+				//			///////////// todo gerer les pieces transformees ///////////////////////
+				//			//if(p.history.get(0)[0] != 0)
+				//				
+				//				
+				//		}
+	            //
+				//	}else{
+				//		// todo gerer les erreurs
+				//	}
+				//}
+				
+				while((line = input.readLine()) != null){
+					
+					Piece p = null;
+					String str[] = line.split("-");
+					int len = str.length;
+					String tmp[]=str[0].split(",");
+
+					couleurPiece coul = (Integer.parseInt(tmp[1]) == 2)?couleurPiece.BLANCHE:couleurPiece.NOIRE;
+					int typePieceRaw = Integer.parseInt(tmp[0]);
+					
+					tmp = str[1].split(",");
+					
+					int x = Integer.parseInt(tmp[1]);
+					int y = Integer.parseInt(tmp[2]);
+
+					switch(typePieceRaw){
+						case 1:
+							p = new Pion(coul,x,y);
+							break;
+						case 2:
+							p = new Cavalier(coul,x,y);
+							break;
+						case 3:
+							p = new Fou(coul,x,y);
+							break;
+						case 4:
+							p = new Tour(coul,x,y);
+							break;
+						case 5:
+							p = new Reine(coul,x,y);
+							break;
+						case 6:
+							if(coul == couleurPiece.NOIRE){
+								jeu.roiNoir = new Roi(coul,x,y);
+								p=jeu.roiNoir;
 							}else{
-								jeu.majPos(p,false);
+								jeu.roiBlanc = new Roi(coul,x,y);
+								p=jeu.roiBlanc;
 							}
-							
-						}
-	
-					}else{
-						// todo gerer les erreurs
+							break;
+						default:
+							break;
 					}
-				}
+					
+					list.add(p);
+					
+					int i = 2;
+
+						while( i < len){
+							tmp = str[i].split(",");
+							p.history.add(new int[] {Integer.parseInt(tmp[0]),Integer.parseInt(tmp[1]),Integer.parseInt(tmp[2])});
+							i++;
+						}
+						
+						// remettre la piece a sa place d'avant la destruction du contexte
+						p.setPosX(p.history.get(p.history.size()-1)[1]);
+						p.setPosY(p.history.get(p.history.size()-1)[2]);
+						
+						if(p.posY == 0 || p.posX == 0){
+							// la piece a ete capture : elle n'est plus sur le plateau
+							Echiquier.capturePiece(p,true);
+						}else{
+							if(p.posX == p.posX0 && p.posY == p.posY0)
+								jeu.initPos(p);
+							else
+								jeu.majPos(p,false);
+						}
+
+				}	
 	
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -149,15 +225,36 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+	
+		String path = null;
+		File file = null;
+	    String state = Environment.getExternalStorageState();
+	    
+	    if (Environment.MEDIA_MOUNTED.equals(state)) {
+			path = Environment.getExternalStorageDirectory().toString() + "/keep.txt";
+	    } else {
+			path = this.getApplicationContext().getFilesDir() + "/keep.txt";
+	    }
+
+		file = new File(path);
+		
 		super.onCreate(savedInstanceState);
 		
 		jeu = new Echiquier(this);
+		
+
+		if(!file.exists())
+			jeu.Initialise(false);
+		else
+		{
+			jeu.Initialise(true);
+			this.loadBoard();
+		}
+		
 		setContentView(jeu);
 		
 		jeu.setOnTouchListener(this);
 		jeu.setOnClickListener(this);
-		
-		this.loadBoard();
 		
 	}
 	
@@ -214,9 +311,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 	@Override
 	protected void onRestart() {
 		// TODO Auto-generated method stub
-		
-		jeu.restart = true;
-		
+
 		super.onRestart();
 		
 		Log.i("onRestart","onRestart called");
@@ -237,6 +332,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 		return true;
 	}
 
+	
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -283,18 +379,18 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 					if(vDep < 0)
 					{
 						// deplacement annule
-						pf.posY = pf.posX0;
-						pf.posX = pf.posY0;
+						pf.posY = pf.posY0;
+						pf.posX = pf.posX0;
 					}
 					else
 					{
 						// on incremente le compteur de coup
-						jeu.numCoup++;
+						Echiquier.numCoup++;
 					}
 					
 					pf.enDeplacement = false;
 					
-					Log.i("ACTION_UP","X = "+pf.posY+" Y = "+pf.posX);
+					Log.i("ACTION_UP","Y = "+pf.posY+" X = "+pf.posX);
 				}
 					
 				Log.i("ACTION_UP","verifDeplacement retourne : "+vDep);
@@ -326,14 +422,14 @@ public class MainActivity extends Activity implements View.OnTouchListener, View
 				else
 				{
 					// on garde la position d'origine de la piece
-					p0.posX0 = col0 + 1;
-					p0.posY0 = ligne0 + 1;
+					p0.posY0 = col0 + 1;
+					p0.posX0 = ligne0 + 1;
 					
 					// la piece est maintenue par le joueur
 					p0.enDeplacement = true;
 					
 					Log.i("ACTION_DOWN","||||||||||||||||||| nouvelle action |||||||||||||||||||");
-					Log.i("ACTION_DOWN","X0 = "+p0.posX0+" Y0 = "+p0.posY0);
+					Log.i("ACTION_DOWN","Y0 = "+p0.posY0+" X0 = "+p0.posX0);
 				}
 				
 				return true;

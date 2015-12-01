@@ -12,7 +12,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.util.Log;
 import android.view.Display;
-
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -29,10 +28,13 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 	private static Case[][] plateau = null;
 	private static List<Piece> pieces = null;
 	
+	public Roi roiBlanc = null;
+	public Roi roiNoir = null;
+	
 	boolean flag = false;
-	boolean restart = false;
+	//boolean restart = false;
 	couleurPiece tourJoueur = couleurPiece.BLANCHE;
-	int numCoup = 1;	
+	static int numCoup = 1;	
 	
 	private static int wScreen = 0;
 	private static int hScreen = 0;
@@ -56,12 +58,11 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 	static Bitmap imgReineBlanc;
 	static Bitmap imgReineNoir; 
 	
-	
 	DrawingThread mThread;
 	private static SurfaceHolder mSurfaceHolder;
 	private static Paint mPaint; 
 	
-	public void Initialise()
+	public void Initialise(boolean refresh)
 	{
 		int i = 0;
 		int j = 0;
@@ -72,31 +73,36 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		
 		///////////////////////// instanciation des pieces /////////////////////////
 		
-		for(i = 1;i<=8;i++)
-			pieces.add(new Pion(couleurPiece.BLANCHE, 2, i));
-		for(i = 1;i<=8;i++)
-			pieces.add(new Pion(couleurPiece.NOIRE, 7, i));
-		
-		pieces.add(new Tour(couleurPiece.BLANCHE, 1, 1));
-		pieces.add(new Tour(couleurPiece.BLANCHE, 1, 8));
-		pieces.add(new Tour(couleurPiece.NOIRE, 8, 1));
-		pieces.add(new Tour(couleurPiece.NOIRE, 8, 8));
-		
-		pieces.add(new Cavalier(couleurPiece.BLANCHE, 1, 2));
-		pieces.add(new Cavalier(couleurPiece.BLANCHE, 1, 7));
-		pieces.add(new Cavalier(couleurPiece.NOIRE, 8, 2));
-		pieces.add(new Cavalier(couleurPiece.NOIRE, 8, 7));
-		
-		pieces.add(new Fou(couleurPiece.BLANCHE, 1, 3));
-		pieces.add(new Fou(couleurPiece.BLANCHE, 1, 6));
-		pieces.add(new Fou(couleurPiece.NOIRE, 8, 3));
-		pieces.add(new Fou(couleurPiece.NOIRE, 8, 6));
-		
-		pieces.add(new Reine(couleurPiece.BLANCHE, 1, 4));
-		pieces.add(new Reine(couleurPiece.NOIRE, 8, 4));
-		
-		pieces.add(new Roi(couleurPiece.BLANCHE, 1, 5));
-		pieces.add(new Roi(couleurPiece.NOIRE, 8, 5));
+		if(!refresh)
+		{
+			for(i = 1;i<=8;i++)
+				pieces.add(new Pion(couleurPiece.BLANCHE, 2, i));
+			for(i = 1;i<=8;i++)
+				pieces.add(new Pion(couleurPiece.NOIRE, 7, i));
+			
+			pieces.add(new Tour(couleurPiece.BLANCHE, 1, 1));
+			pieces.add(new Tour(couleurPiece.BLANCHE, 1, 8));
+			pieces.add(new Tour(couleurPiece.NOIRE, 8, 1));
+			pieces.add(new Tour(couleurPiece.NOIRE, 8, 8));
+			
+			pieces.add(new Cavalier(couleurPiece.BLANCHE, 1, 2));
+			pieces.add(new Cavalier(couleurPiece.BLANCHE, 1, 7));
+			pieces.add(new Cavalier(couleurPiece.NOIRE, 8, 2));
+			pieces.add(new Cavalier(couleurPiece.NOIRE, 8, 7));
+			
+			pieces.add(new Fou(couleurPiece.BLANCHE, 1, 3));
+			pieces.add(new Fou(couleurPiece.BLANCHE, 1, 6));
+			pieces.add(new Fou(couleurPiece.NOIRE, 8, 3));
+			pieces.add(new Fou(couleurPiece.NOIRE, 8, 6));
+			
+			pieces.add(new Reine(couleurPiece.BLANCHE, 1, 4));
+			pieces.add(new Reine(couleurPiece.NOIRE, 8, 4));
+			
+			roiBlanc = new Roi(couleurPiece.BLANCHE, 1, 5);
+			pieces.add(roiBlanc);
+			roiNoir = new Roi(couleurPiece.NOIRE, 8, 5);
+			pieces.add(roiNoir);
+		}
 		
 		///////////////////////// creation des cases de l'echiquier /////////////////////////
 				
@@ -116,10 +122,7 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		for(Piece p : pieces){			
 			plateau[p.posX-1][p.posY-1].setOccupant(p);
 		}
-		
 
-			
-		
 		Log.i("initialise", "init finished");
 	}
 	
@@ -148,7 +151,6 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
     	
     	wScreen = size.x;
     	hScreen = size.y;
-
     	
 		/*CaseBlanche = BitmapFactory.decodeResource(getResources(), R.drawable.case_blanc);
 		Bitmap.createScaledBitmap(CaseBlanche, wScreen/8, wScreen/8, true);
@@ -158,7 +160,7 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		
     	scale_img();
 
-		this.Initialise();
+		//this.Initialise();
 	}
 	
 	static void dessiner(Canvas pCanvas)
@@ -266,9 +268,6 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		else
 		{
 			scale_img();
-			if(!this.restart)
-				Initialise();
-			
 			mThread = new DrawingThread();
 			mThread.start();	
 		}
@@ -356,7 +355,69 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		return null;
 	}
 	
-	public void capturePiece(Piece pf, boolean refresh)
+	public static int getNumCoup() {
+		return numCoup;
+	}
+	
+	
+	// gerer echec/mat
+	protected boolean roiEchec()
+	{
+		Roi roi = (this.tourJoueur == couleurPiece.BLANCHE)?this.roiBlanc:this.roiNoir;
+		
+		if(this.caseControlee(roi.cPiece, roi.posX, roi.posY))
+			return true;
+		else
+			return false;
+	}
+	
+	// pour savoir si une case est controlee par l'adversaire
+	private boolean caseControlee(couleurPiece couleur, int ligne, int col)
+	{
+		int posX = 0;
+		int posY = 0;
+		
+		for(Piece p : Echiquier.getPieces())
+		{
+			// on verifie que le deplacement ne provoque ou ne maintient pas le roi en echec
+			if((couleur != p.cPiece) && !(p.capturee))
+			{
+				// si la piece peut atteindre le roi adverse le tour suivant
+				if(p.tPiece == typePiece.PION)
+				{
+					// cas specifique du pion dont le deplacement depend de s'il attaque ou s'il avance simplement
+					Pion pion = (Pion)p;
+					// on verifie directement si la case de destination du roi est controlee par le pion (le pion ne controle pas la case devant lui)
+					if(pion.mouvControle(ligne, col))
+						return true;
+				}
+				else
+				{
+					// on simule un deplacement de la piece sur l'emplacement du roi adverse
+					posX = p.posX;
+					p.posX = ligne;
+					posY = p.posY;
+					p.posY = col;
+					
+					// si la piece peut atteindre le roi adverse le tour suivant
+					if(p.mouvAutorise())
+					{		
+						// on retablit la position reelle de la piece puis on quitte la fonction (pas besoin d'aller plus loin)
+						p.posX = posX;
+						p.posY = posY;
+						return true;
+					}
+					
+					// on retablit la position reelle de la piece avant de tester la piece suivante
+					p.posX = posX;
+					p.posY = posY;
+				}
+			}
+		}
+		return false;
+	}
+
+	public static void capturePiece(Piece pf, boolean refresh)
 	{
 		if(pf == null)
 		{
@@ -367,21 +428,24 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		// si c'est un rafraichissement de la position suite a une destruction de l'activite
 		if(refresh)
 		{		
-			// la piece est a sa position d'origine pour l'instant
-			plateau[pf.history.get(0)[1]-1][pf.history.get(0)[2]-1].setOccupant(null);
+			// la piece est a sa position d'origine a cet instant ...
+			// sauf si une autre piece a pris sa place (et a deja ete maj)
+			if(plateau[pf.posX0-1][pf.posY0-1].getOccupant()!=null)
+				if(plateau[pf.history.get(0)[1]-1][pf.history.get(0)[2]-1].getOccupant().equals(pf))				
+					plateau[pf.history.get(0)[1]-1][pf.history.get(0)[2]-1].setOccupant(null);
 		}
 		else
 		{
 			// libere la case de destination
 			plateau[pf.posX-1][pf.posY-1].setOccupant(null);
-			pf.history.add(new int[]{this.numCoup,0,0});
+			pf.history.add(new int[]{numCoup,0,0});
 		}
 		
 		// la piece capturee se retrouve hors du plateau
 		pf.posY = 0;
-		pf.posX0 = 0;
-		pf.posX = 0;
 		pf.posY0 = 0;
+		pf.posX = 0;
+		pf.posX0 = 0;
 		
 		pf.capturee = true;	
 	}
@@ -394,33 +458,61 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 			return;
 		}
 		
+		// si la position de depart et d'origine sont identiques
+		if(pf.posX == pf.posX0 && pf.posY == pf.posY0)
+			return;
+		
 		// remplit la case de destination
 		plateau[pf.posX-1][pf.posY-1].setOccupant(pf);
-		// libere la case d'origine
-		plateau[pf.posY0-1][pf.posX0-1].setOccupant(null); 
 		
+		// libere la case d'origine de la piece si une autre piece n'est pas venue s'y mettre
+		if(plateau[pf.posX0-1][pf.posY0-1].getOccupant()!=null)
+			if(plateau[pf.posX0-1][pf.posY0-1].getOccupant().equals(pf))
+				plateau[pf.posX0-1][pf.posY0-1].setOccupant(null); 
+
 		// repositionne la position d'origine sur la destination
-		pf.posX0 = pf.posY;
-		pf.posY0 = pf.posX;
+		pf.posY0 = pf.posY;
+		pf.posX0 = pf.posX;
 		
 		// alimente l'historique de la piece sauf si chargement de configuration du plateau (deja fait prealablement)
 		if(updateHistory)
-			pf.history.add(new int[]{this.numCoup,pf.posX,pf.posY});
-		
-		this.tourJoueur = (pf.cPiece == couleurPiece.BLANCHE)?couleurPiece.NOIRE:couleurPiece.BLANCHE;
+			pf.history.add(new int[]{Echiquier.numCoup,pf.posX,pf.posY});
 	}
 	
-	// retourne un nombre positif si la piece a ete deplacee (0 sur une case vide, 1 prend une piece adverse, 2 roc, 3 transformation, 4 position d'origine)
+	public void initPos(Piece pf)
+	{
+		if(pf == null)
+		{
+			Log.i("majPos","piece == null");
+			return;
+		}
+		
+		// remplit la case de destination
+		plateau[pf.posX-1][pf.posY-1].setOccupant(pf);
+
+		// repositionne la position d'origine sur la destination
+		pf.posY0 = pf.posY;
+		pf.posX0 = pf.posX;
+
+	}
+	
+	// retourne un nombre positif si la piece a ete deplacee (0 sur une case vide, 1 prend une piece adverse, 2 roc, 3 promotion, 4 position d'origine, 13 promotion avec prise)
 	// sinon un nombre negatif (-1 ne doit pas arriver, -2 hors plateau, -3 place occupee, -4 deplacement non autorise pour la piece, -5 decouvre roi, -6 tour du joueur adverse)
 	public int verifDeplacement(Piece p)
 	{
 		Piece prise = null;
+		boolean result = false;
 		
 		// normalise la position de la piece
 		p.posX = 8-p.posX/wRect;
 		p.posY = p.posY/wRect+1;
 		
-		if((p.posY == p.posX0)&&(p.posX == p.posY0))
+		if(Echiquier.numCoup % 2 != 0)
+			this.tourJoueur = couleurPiece.BLANCHE;
+		else
+			this.tourJoueur = couleurPiece.NOIRE;
+		
+		if((p.posY == p.posY0)&&(p.posX == p.posX0))
 			return 4;
 		
 		// si la piece n'etait pas en deplacement (erreur a priori)
@@ -433,10 +525,39 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 		
 		// piece reposee hors plateau
 		if( (p.posX > 8) || (p.posY > 8) ||(p.posX <= 0) ||(p.posY <= 0))
-			return -2;		
+			return -2;
+
+		// deplacement special roque : si le roi se deplace de 2 case
+		if(p.tPiece == typePiece.ROI && Math.abs(p.posY-p.posY0)==2)
+		{
+			if(this.roque((Roi)p))
+				return 2;
+			else
+				return -4;
+		}
 		
 		if(!p.mouvAutorise())
-			return -4;					
+			return -4;
+
+		// on deplace temporairement la piece sur le plateau pour evaluer la validite du coup
+		prise = plateau[p.posX-1][p.posY-1].getOccupant();
+		plateau[p.posX-1][p.posY-1].setOccupant(p);
+		plateau[p.posX0-1][p.posY0-1].setOccupant(null); 
+		if (prise!=null)
+			prise.capturee = true;
+		
+		// pour verifier que le coup ne met pas le roi en echec
+		result = this.roiEchec();
+		
+		// l'etat de l'echiquier sera mis a jour plus tard si le deplacement est autorise
+		plateau[p.posX-1][p.posY-1].setOccupant(prise);
+		plateau[p.posX0-1][p.posY0-1].setOccupant(p); 
+		if (prise!=null)
+			prise.capturee = false;
+
+		// le deplacement mettrait le roi en echec et n'est donc pas autorise
+		if(result)
+			return -5;
 		
 		// place occupee 
 		prise = getPiece(p.posX-1, p.posY-1);
@@ -449,23 +570,70 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 			{		
 				capturePiece(prise,false);
 				majPos(p,true);
-				return 1;
+				if( (p.tPiece == typePiece.PION) &&
+				    ((p.cPiece == couleurPiece.BLANCHE && p.posX == 8) || (p.cPiece == couleurPiece.NOIRE && p.posX == 1)))
+				{
+					this.transform(p);
+					return 13;
+				}
+				else
+				{
+					return 1;
+			
+				}
 			}
 		}
 
-		// deplacement special roque : si le roi se deplace de 2 case et mouvAutorise est true
-		if(p.tPiece == typePiece.ROI && Math.abs(p.posY-p.posX0)==2)
+		// promotion
+		if(p.tPiece == typePiece.PION)
 		{
-			if(this.roque((Roi)p))
-				return 2;
+			if(p.cPiece == couleurPiece.BLANCHE)
+			{
+				if(p.posX == 8)
+				{
+					this.transform(p);
+					return 3;
+				}
+			}
 			else
-				return -4;
+			{
+				if(p.posX == 1)
+				{
+					this.transform(p);
+					return 3;
+				}
+			}
 		}
 		
 		majPos(p,true);
 		return 0;
 	}
 	
+	private void transform(Piece p)
+	{
+		int index = pieces.indexOf(p);
+		Reine upgrade = new Reine(p.cPiece,p.posX,p.posY);
+
+		//majPos(p, true);
+		
+		plateau[p.posX0-1][p.posY0-1].setOccupant(null);
+		
+		capturePiece(p, false);
+		
+		//p.posX = 0;
+		//p.posY = 0;
+		//p.posY0 = p.posY;
+		//p.posX0 = p.posX;
+		
+		p.history.add(new int[]{Echiquier.numCoup,p.posX,p.posY});
+		
+		this.tourJoueur = (p.cPiece == couleurPiece.BLANCHE)?couleurPiece.NOIRE:couleurPiece.BLANCHE;
+		
+		//pieces.remove(p);
+		pieces.add(index,upgrade);
+		
+		plateau[upgrade.posX-1][upgrade.posY-1].setOccupant(upgrade);
+	}
 	
 	private boolean roque(Roi p)
 	{		
@@ -474,7 +642,7 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 			return false;
 		
 		// on determine le cote du roque
-		if(p.posY-p.posX0 > 0)
+		if(p.posY-p.posY0 > 0)
 		{
 			// petit roque
 			if(p.cPiece == couleurPiece.BLANCHE)
@@ -483,22 +651,31 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 				if(plateau[0][7].occupant.history.size()>1)
 					return false;
 				
+				// si la zone de transition est controlee par l'adversaire le roque n'est pas permis
+				if( (this.caseControlee(couleurPiece.BLANCHE, 1, 8)) ||
+					(this.caseControlee(couleurPiece.BLANCHE, 1, 7)) ||
+					(this.caseControlee(couleurPiece.BLANCHE, 1, 6)) ||
+					(this.caseControlee(couleurPiece.BLANCHE, 1, 5)) )
+						return false;
+				
 				// blancs la tour h1 viens en f1
 				plateau[0][7].occupant.posY = 6;				
-				plateau[0][5].setOccupant(plateau[0][7].occupant);
-				plateau[0][7].setOccupant(null);
-				majPos(plateau[0][5].occupant,true);
+				majPos(plateau[0][7].occupant,true);
 			}
 			else
 			{
 				if(plateau[7][7].occupant.history.size()>1)
 					return false;
 				
+				if( (this.caseControlee(couleurPiece.NOIRE, 8, 8)) ||
+					(this.caseControlee(couleurPiece.NOIRE, 8, 7)) ||
+					(this.caseControlee(couleurPiece.NOIRE, 8, 6)) ||
+					(this.caseControlee(couleurPiece.NOIRE, 8, 5)) )
+						return false;
+				
 				// noirs la tour h8 viens en f8
 				plateau[7][7].occupant.posY = 6;
-				plateau[7][5].setOccupant(plateau[7][7].occupant);
-				plateau[7][7].setOccupant(null);
-				majPos(plateau[7][5].occupant,true);
+				majPos(plateau[7][7].occupant,true);
 			}
 		}
 		else
@@ -509,32 +686,36 @@ public class Echiquier extends SurfaceView  implements SurfaceHolder.Callback{
 				if(plateau[0][0].occupant.history.size()>1)
 					return false;
 				
-				// blancs la tour a1 viens en c1
+				if( (this.caseControlee(couleurPiece.BLANCHE, 1, 1)) ||
+					(this.caseControlee(couleurPiece.BLANCHE, 1, 2)) ||
+					(this.caseControlee(couleurPiece.BLANCHE, 1, 3)) ||
+					(this.caseControlee(couleurPiece.BLANCHE, 1, 4)) ||
+					(this.caseControlee(couleurPiece.BLANCHE, 1, 5)) )
+						return false;
+				
+				// blancs la tour a1 viens en d1
 				plateau[0][0].occupant.posY = 4;
-				plateau[0][2].setOccupant(plateau[0][0].occupant);
-				plateau[0][0].setOccupant(null);
-				majPos(plateau[0][2].occupant,true);
+				majPos(plateau[0][0].occupant,true);
 			}
 			else
 			{
 				if(plateau[7][0].occupant.history.size()>1)
 					return false;
 				
-				// noirs la tour a8 viens en c8
+				if( (this.caseControlee(couleurPiece.NOIRE, 8, 1)) ||
+					(this.caseControlee(couleurPiece.NOIRE, 8, 2)) ||
+					(this.caseControlee(couleurPiece.NOIRE, 8, 3)) ||
+					(this.caseControlee(couleurPiece.NOIRE, 8, 4)) ||
+					(this.caseControlee(couleurPiece.NOIRE, 8, 5)) )
+						return false;
+				
+				// noirs la tour a8 viens en d8
 				plateau[7][0].occupant.posY = 4;
-				plateau[7][2].setOccupant(plateau[7][0].occupant);
-				plateau[7][0].setOccupant(null);
-				majPos(plateau[7][2].occupant,true);
+				majPos(plateau[7][0].occupant,true);
 			}
 		}		
-		
-		// on deplace le roi
-		plateau[p.posX-1][p.posY-1].setOccupant(p);
-		// libere la case d'origine
-		plateau[p.posY0-1][p.posX0-1].setOccupant(null); 
+
 		majPos(p,true);
-		
-		
 		return true;
 	}
 	

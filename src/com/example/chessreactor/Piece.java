@@ -3,7 +3,6 @@ package com.example.chessreactor;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.util.Log;
 
 public class Piece {
 	
@@ -34,8 +33,8 @@ public class Piece {
 	int posY = 0;
 	
 	// position d'origine sur un deplacement
-	int posY0 = 0;
 	int posX0 = 0;
+	int posY0 = 0;
 	
 	// historique des positions
 	List <int[]>  history;
@@ -81,8 +80,8 @@ public class Piece {
 		this.cPiece = c;
 		this.posX = ligne;
 		this.posY = col;
-		this.posY0 = this.posX;
-		this.posX0 = this.posY;
+		this.posX0 = this.posX;
+		this.posY0 = this.posY;
 
 		this.history = new ArrayList<int[]>();
 		this.history.add(new int[]{0,this.posX,this.posY});
@@ -96,6 +95,10 @@ public class Piece {
 	
 	protected boolean mouvRectiligne(int X0, int Xf, int Y0, int Yf)
 	{
+		// si la position de depart et d'origine sont identiques
+		if(X0 == Xf && Y0 == Yf)
+			return false;
+		
 		// si le deplacement n'est pas rectiligne
 		if((X0 != Xf) && (Y0 != Yf))
 			return false;
@@ -119,6 +122,10 @@ public class Piece {
 	
 	protected boolean mouvDiagonale(int X0, int Xf, int Y0, int Yf)
 	{
+		// si la position de depart et d'origine sont identiques
+		if(X0 == Xf && Y0 == Yf)
+			return false;
+		
 		// si le deplacement n'est pas diagonal
 		if(Math.abs(X0-Xf) != Math.abs(Y0-Yf))
 			return false;

@@ -10,14 +10,13 @@ public class Cavalier extends Piece{
 	@Override
 	protected boolean mouvAutorise()
 	{
-
 		// la cavalier se deplace en "L"
-		if(Math.abs(this.posY-this.posX0)==1)
-			if(Math.abs(this.posX-this.posY0)==2)
+		if(Math.abs(this.posY-this.posY0)==1)
+			if(Math.abs(this.posX-this.posX0)==2)
 				return true;
 		
-		if(Math.abs(this.posY-this.posX0)==2)
-			if(Math.abs(this.posX-this.posY0)==1)
+		if(Math.abs(this.posY-this.posY0)==2)
+			if(Math.abs(this.posX-this.posX0)==1)
 				return true;
 		
 		return false;

@@ -9,10 +9,10 @@ public class Reine extends Piece{
 	@Override
 	protected boolean mouvAutorise()
 	{
-		if(mouvRectiligne(this.posX0, this.posY, this.posY0, this.posX))
+		if(mouvRectiligne(this.posY0, this.posY, this.posX0, this.posX))
 			return true;
 		
-		if(mouvDiagonale(this.posX0, this.posY, this.posY0, this.posX))
+		if(mouvDiagonale(this.posY0, this.posY, this.posX0, this.posX))
 			return true;
 			
 		return false;
